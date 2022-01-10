@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/kinglisky/kakashi#readme",
   "dependencies": {
+    "download": "^8.0.0",
     "ffcreator": "^6.4.3",
     "ffcreatorlite": "^2.3.8"
   },
