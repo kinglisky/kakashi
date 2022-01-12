@@ -26,13 +26,18 @@ const fetchImages = () => {
 const downloadImages = (images) => {
     const tasks = images.map((image, index) => {
         console.log('download', image);
-        const filename = `${index}${image.match(/\.\w+$/)[0]}`
-        return download(image, 'download', { filename });
+        const filename = `${index}${image.match(/\.\w+$/)[0]}`;
+        const output = `download/${new Date().toLocaleDateString().replace(/\//g, '')}`;
+        return download(image, output, { filename }).then(() => `${output}/${filename}`);
     });
     return Promise.all(tasks);
 }
 
-(async function () {
-    const images = await fetchImages();
-    await downloadImages(images);
-})();
+const convertImages = (files) => {
+
+}
+
+module.exports = {
+    fetchImages,
+    downloadImages,
+}
