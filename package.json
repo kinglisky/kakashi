@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/kinglisky/kakashi#readme",
   "dependencies": {
+    "axios": "^0.24.0",
     "crawler": "^1.3.0",
     "download": "^8.0.0",
     "ffcreator": "^6.4.3",
