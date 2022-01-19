@@ -102,6 +102,13 @@
     "@types/got" "^8"
     "@types/node" "*"
 
+"@types/fluent-ffmpeg@^2.1.20":
+  version "2.1.20"
+  resolved "https://registry.npmmirror.com/@types/fluent-ffmpeg/download/@types/fluent-ffmpeg-2.1.20.tgz#3b5f42fc8263761d58284fa46ee6759a64ce54ac"
+  integrity sha512-B+OvhCdJ3LgEq2PhvWNOiB/EfwnXLElfMCgc4Z1K5zXgSfo9I6uGKwR/lqmNPFQuebNnes7re3gqkV77SyypLg==
+  dependencies:
+    "@types/node" "*"
+
 "@types/got@^8":
   version "8.3.6"
   resolved "https://registry.npmmirror.com/@types/got/download/@types/got-8.3.6.tgz#1d8762605818ae8b1ae320f9d7ca5247b6767da7"
