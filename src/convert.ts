@@ -1,5 +1,6 @@
 import sharp from 'sharp';
 import ffmpeg from 'fluent-ffmpeg';
+import { IFileInfo, IDonwloadItem } from './resources';
 
 export function getImageMeta(filePath: string): Promise<sharp.Metadata> {
     return sharp(filePath).metadata();
@@ -68,8 +69,7 @@ interface IConvertResutl {
 export async function convertGif2Video(
     options: IGif2VideoOptions
 ): Promise<IConvertResutl> {
-    const { path, width, height, fileName, inputFileType, outputFileType } =
-        options;
+    const { path, width, height, inputFileType, outputFileType } = options;
     const meta = await getImageMeta(path);
     const boxArea = computedBoxArea({
         input: {
@@ -120,4 +120,29 @@ export async function convertGif2Video(
             })
             .save(outputPath);
     });
+}
+
+interface IViewContainerOptins {
+    width: number;
+    height: number;
+}
+
+export async function resizeImage(
+    file: IFileInfo,
+    viewContainerOptins: IViewContainerOptins
+) {}
+
+export async function resizeImages(
+    downloadList: Array<IDonwloadItem>,
+    viewContainerOptins: IViewContainerOptins
+) {
+    return downloadList.reduce((promise, downloadItem) => {
+        return promise.then(() => {
+            const { files } = downloadItem;
+            const resizeTasks = files.map((file) =>
+                resizeImage(file, viewContainerOptins)
+            );
+            return Promise.all(resizeTasks).then(() => {});
+        });
+    }, Promise.resolve());
 }

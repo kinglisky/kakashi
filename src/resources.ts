@@ -27,14 +27,21 @@ export function fetchComments(): Promise<Array<IComment>> {
                     const items: Array<IComment> = [];
                     $('#comments ol li .row').each((_, it) => {
                         const current = $(it);
-                        const imageLink = current.find(
-                            '.text .view_img_link'
-                        )[0] as cheerio.TagElement;
+                        const urls: Array<string> = [];
+                        current
+                            .find('.text .view_img_link')
+                            .each((_, imageLink) => {
+                                const imageURL = `http:${
+                                    (imageLink as cheerio.TagElement).attribs
+                                        .href
+                                }`;
+                                urls.push(imageURL);
+                            });
                         const tucaoLink = current.find(
                             '.tucao-btn'
                         )[0] as cheerio.TagElement;
                         items.push({
-                            urls: [`http:${imageLink.attribs.href}`],
+                            urls,
                             id: tucaoLink.attribs['data-id'],
                         });
                     });
@@ -58,7 +65,7 @@ export interface IFileInfo {
     fileType: string;
 }
 export interface IDonwloadItem {
-    data: string;
+    data: any;
     files: Array<IFileInfo>;
 }
 
@@ -89,20 +96,15 @@ export function downloadCommentImages(
 export async function downloadComments(
     comments: Array<IComment>
 ): Promise<Array<IDonwloadItem>> {
-    const res: Array<IDonwloadItem> = [];
     const date = new Date().toLocaleDateString().replace(/\//g, '');
-    // 可以用 map 但 reduce 可以看到单个文件下载的进度，比较爽~
-    await comments.reduce((promise, item) => {
+    const tasks = comments.map((item) => {
         const { urls, id } = item;
-        return promise.then(() => {
-            return Promise.all([
-                downloadCommentImages(urls, date, id),
-                loadComment(id),
-            ]).then(([files, data]) => {
-                res.push({ files, data });
-                return writeFile(`${date}.json`, JSON.stringify(res, null, 4));
-            });
-        });
-    }, Promise.resolve());
+        return Promise.all([
+            downloadCommentImages(urls, date, id),
+            loadComment(id),
+        ]).then(([files, data]) => ({ files, data }));
+    });
+    const res = await Promise.all(tasks);
+    await writeFile('comments.josn', JSON.stringify(res, null, 4));
     return res;
 }
