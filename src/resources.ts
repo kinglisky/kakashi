@@ -82,6 +82,7 @@ export function downloadCommentImages(
         const fileType = matchFile![1].toLowerCase();
         const output = `download/${dir}`;
         return download(url, output, { filename: fileName }).then(() => {
+            console.log(`download: ${url} completed`);
             return {
                 url,
                 fileName,

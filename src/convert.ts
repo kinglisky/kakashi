@@ -2,16 +2,12 @@ import sharp from 'sharp';
 import ffmpeg from 'fluent-ffmpeg';
 import { IFileInfo, IDonwloadItem } from './resources';
 
-export function getImageMeta(filePath: string): Promise<sharp.Metadata> {
-    return sharp(filePath).metadata();
-}
-
-interface IInputOptins {
+interface IRenderOptins {
     input: {
         width: number;
         height: number;
     };
-    render: {
+    container: {
         width: number;
         height: number;
     };
@@ -24,33 +20,36 @@ interface IBoxArea {
     y: number;
 }
 
-export function computedBoxArea(options: IInputOptins): IBoxArea {
-    const { input, render } = options;
+function computedVideoRenderArea(options: IRenderOptins): IBoxArea {
+    const { input, container } = options;
     const boxArea: IBoxArea = {
         width: 0,
         height: 0,
         x: 0,
         y: 0,
     };
-    // 视频高度适配 OR 宽度适配
-    if (render.height > render.width) {
-        boxArea.height = render.height;
-        boxArea.width = Math.round(
-            (boxArea.height / input.height) * input.width
-        );
-        boxArea.x = Math.round((render.width - boxArea.width) / 2);
-        boxArea.y = 0;
-    } else {
-        boxArea.width = render.width;
+    const containerRatioHW = container.height / container.width;
+    const inputRatioHW = input.height / input.width;
+    if (containerRatioHW > inputRatioHW) {
+        boxArea.width = container.width;
         boxArea.height = Math.round(
-            (boxArea.width / input.width) * input.height
+            (container.width / input.width) * input.height
         );
-        boxArea.x = 0;
-        boxArea.y = Math.round((render.height - boxArea.height) / 2);
+    } else {
+        boxArea.height = container.height;
+        boxArea.width = Math.round(
+            (container.height / input.height) * input.width
+        );
     }
+
+    boxArea.x = Math.round((container.width - boxArea.width) / 2);
+    boxArea.y = Math.round((container.height - boxArea.height) / 2);
     return boxArea;
 }
 
+function getImageMeta(filePath: string): Promise<sharp.Metadata> {
+    return sharp(filePath).metadata();
+}
 interface IGif2VideoOptions {
     path: string;
     width: number;
@@ -71,12 +70,12 @@ export async function convertGif2Video(
 ): Promise<IConvertResutl> {
     const { path, width, height, inputFileType, outputFileType } = options;
     const meta = await getImageMeta(path);
-    const boxArea = computedBoxArea({
+    const boxArea = computedVideoRenderArea({
         input: {
             width: meta.width!,
             height: meta.height!,
         },
-        render: {
+        container: {
             width,
             height,
         },
@@ -122,27 +121,39 @@ export async function convertGif2Video(
     });
 }
 
-interface IViewContainerOptins {
+interface IViewContainer {
     width: number;
     height: number;
 }
 
-export async function resizeImage(
-    file: IFileInfo,
-    viewContainerOptins: IViewContainerOptins
-) {}
+type IConvertResult = IFileInfo & {
+    output: {
+        path: string;
+        width: number;
+        height: number;
+    };
+};
 
-export async function resizeImages(
+async function resizeImage(file: IFileInfo, viewContainer: IViewContainer) {
+    const meta = await getImageMeta(file.path);
+}
+
+export async function convertImage(
+    file: IFileInfo,
+    viewContainer: IViewContainer
+): Promise<void> {}
+
+export async function convertImages(
     downloadList: Array<IDonwloadItem>,
-    viewContainerOptins: IViewContainerOptins
+    viewContainer: IViewContainer
 ) {
     return downloadList.reduce((promise, downloadItem) => {
         return promise.then(() => {
             const { files } = downloadItem;
-            const resizeTasks = files.map((file) =>
-                resizeImage(file, viewContainerOptins)
+            const convertTasks = files.map((file) =>
+                convertImage(file, viewContainer)
             );
-            return Promise.all(resizeTasks).then(() => {});
+            return Promise.all(convertTasks).then(() => {});
         });
     }, Promise.resolve());
 }
