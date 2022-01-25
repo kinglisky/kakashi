@@ -13,16 +13,16 @@ interface IRenderOptins {
     };
 }
 
-interface IBoxArea {
+interface IRenderArea {
     width: number;
     height: number;
     x: number;
     y: number;
 }
 
-function computedVideoRenderArea(options: IRenderOptins): IBoxArea {
+function computedVideoRenderArea(options: IRenderOptins): IRenderArea {
     const { input, container } = options;
-    const boxArea: IBoxArea = {
+    const renderArea: IRenderArea = {
         width: 0,
         height: 0,
         x: 0,
@@ -31,20 +31,20 @@ function computedVideoRenderArea(options: IRenderOptins): IBoxArea {
     const containerRatioHW = container.height / container.width;
     const inputRatioHW = input.height / input.width;
     if (containerRatioHW > inputRatioHW) {
-        boxArea.width = container.width;
-        boxArea.height = Math.round(
+        renderArea.width = container.width;
+        renderArea.height = Math.round(
             (container.width / input.width) * input.height
         );
     } else {
-        boxArea.height = container.height;
-        boxArea.width = Math.round(
+        renderArea.height = container.height;
+        renderArea.width = Math.round(
             (container.height / input.height) * input.width
         );
     }
 
-    boxArea.x = Math.round((container.width - boxArea.width) / 2);
-    boxArea.y = Math.round((container.height - boxArea.height) / 2);
-    return boxArea;
+    renderArea.x = Math.round((container.width - renderArea.width) / 2);
+    renderArea.y = Math.round((container.height - renderArea.height) / 2);
+    return renderArea;
 }
 
 function getImageMeta(filePath: string): Promise<sharp.Metadata> {
@@ -62,7 +62,7 @@ interface IGif2VideoOptions {
 interface IConvertResutl {
     originPath: string;
     outputPath: string;
-    meta: IBoxArea;
+    meta: IRenderArea;
 }
 
 export async function convertGif2Video(
@@ -70,7 +70,7 @@ export async function convertGif2Video(
 ): Promise<IConvertResutl> {
     const { path, width, height, inputFileType, outputFileType } = options;
     const meta = await getImageMeta(path);
-    const boxArea = computedVideoRenderArea({
+    const renderArea = computedVideoRenderArea({
         input: {
             width: meta.width!,
             height: meta.height!,
@@ -82,7 +82,7 @@ export async function convertGif2Video(
     });
     return new Promise((resolve, reject) => {
         const outputPath = path.replace(inputFileType, outputFileType);
-        const size = `${boxArea.width}x${boxArea.height}`;
+        const size = `${renderArea.width}x${renderArea.height}`;
         ffmpeg(path)
             .format(outputFileType)
             .size(size)
@@ -114,7 +114,7 @@ export async function convertGif2Video(
                 resolve({
                     originPath: path,
                     outputPath,
-                    meta: boxArea,
+                    meta: renderArea,
                 });
             })
             .save(outputPath);
