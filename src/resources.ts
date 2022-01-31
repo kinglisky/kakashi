@@ -1,13 +1,21 @@
 import Crawler from 'crawler';
 import download from 'download';
 import axios from 'axios';
-import * as fs from 'fs';
-import * as util from 'util';
-
-const writeFile = util.promisify(fs.writeFile);
-interface IComment {
+import { writeFile, exists } from './utils';
+export interface IComment {
     id: string;
     urls: Array<string>;
+}
+
+export interface IFileInfo {
+    path: string;
+    url: string;
+    fileName: string;
+    fileType: string;
+}
+export interface IDonwloadItem {
+    data: any;
+    files: Array<IFileInfo>;
 }
 
 export function fetchComments(): Promise<Array<IComment>> {
@@ -31,10 +39,9 @@ export function fetchComments(): Promise<Array<IComment>> {
                         current
                             .find('.text .view_img_link')
                             .each((_, imageLink) => {
-                                const imageURL = `http:${
-                                    (imageLink as cheerio.TagElement).attribs
-                                        .href
-                                }`;
+                                const imageURL = `http:${(imageLink as cheerio.TagElement).attribs
+                                    .href
+                                    }`;
                                 urls.push(imageURL);
                             });
                         const tucaoLink = current.find(
@@ -58,38 +65,33 @@ export function loadComment(id: string): Promise<any> {
         .then(({ data }) => data.hot_tucao);
 }
 
-export interface IFileInfo {
-    path: string;
-    url: string;
-    fileName: string;
-    fileType: string;
-}
-export interface IDonwloadItem {
-    data: any;
-    files: Array<IFileInfo>;
-}
-
 export function downloadCommentImages(
     urls: Array<string>,
     dir: string,
     id: string
 ): Promise<IDonwloadItem['files']> {
-    const tasks = urls.map((url, index) => {
+    const tasks = urls.map(async (url, index) => {
         console.log(`download: ${url}`);
         // 配置 .xxx 后缀
         const matchFile = url.match(/\.(\w+)$/);
         const fileName = `${id}-${index}${matchFile![0]}`;
         const fileType = matchFile![1].toLowerCase();
-        const output = `download/${dir}`;
-        return download(url, output, { filename: fileName }).then(() => {
-            console.log(`download: ${url} completed`);
-            return {
-                url,
-                fileName,
-                fileType,
-                path: `${output}/${fileName}`,
-            };
-        });
+        const outputDir = `download/${dir}`;
+        const outputPath = `${outputDir}/${fileName}`;
+        const res = {
+            url,
+            fileName,
+            fileType,
+            path: outputPath,
+        };
+        const exist = await exists(outputPath);
+        if (exist) {
+            console.log(`download: ${url} existed`);
+            return res;
+        }
+        await download(url, outputDir, { filename: fileName });
+        console.log(`download: ${url} completed`);
+        return res;
     });
     return Promise.all(tasks);
 }

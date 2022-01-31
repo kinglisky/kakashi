@@ -1,28 +1,12 @@
-import { fetchComments, downloadComments, IFileInfo } from './src/resources';
-import { convertGif2Video } from './src/convert';
-import axios from 'axios';
+import { fetchComments, downloadComments, IFileInfo, IDonwloadItem } from './src/resources';
+import { convertImages } from './src/convert';
 
 (async function () {
     const comments = await fetchComments();
     const items = await downloadComments(comments);
-    // const files: Array<IFileInfo> = [];
-    // items.forEach((item) => {
-    //     files.push(...item.files.filter((file) => file.fileType === 'gif'));
-    // });
-    // const res: any[] = [];
-    // files.reduce((promise, file) => {
-    //     return promise
-    //         .then(() => {
-    //             return convertGif2Video({
-    //                 fileName: file.fileName,
-    //                 path: file.path,
-    //                 width: 1920,
-    //                 height: 1080,
-    //                 inputFileType: 'gif',
-    //                 outputFileType: 'mp4',
-    //             }).then(() => {});
-    //         })
-    //         .catch(() => {});
-    // }, Promise.resolve());
-    // console.log('done', res);
+    const res: any[] = await convertImages(items, {
+        width: 1920,
+        height: 1080,
+    })
+    console.log('done', res);
 })();
