@@ -31,7 +31,6 @@ interface IConvertResutl {
     renderArea: IRenderArea;
 }
 
-
 function computedVideoRenderArea(options: IRenderOptins): IRenderArea {
     const { input, container } = options;
     const renderArea: IRenderArea = {
@@ -63,7 +62,11 @@ function getImageMeta(filePath: string): Promise<sharp.Metadata> {
     return sharp(filePath).metadata();
 }
 
-async function convertGif2Video(file: IFileInfo, viewContainer: IViewContainer, videoType: string = 'mp4'): Promise<IConvertResutl> {
+async function convertGif2Video(
+    file: IFileInfo,
+    viewContainer: IViewContainer,
+    videoType: string = 'mp4'
+): Promise<IConvertResutl> {
     const { path, fileType } = file;
     const meta = await getImageMeta(path);
     const renderArea = computedVideoRenderArea({
@@ -88,11 +91,11 @@ async function convertGif2Video(file: IFileInfo, viewContainer: IViewContainer, 
             .on('codecData', function (data) {
                 console.log(
                     'Input is ' +
-                    data.audio +
-                    ' audio ' +
-                    'with ' +
-                    data.video +
-                    ' video'
+                        data.audio +
+                        ' audio ' +
+                        'with ' +
+                        data.video +
+                        ' video'
                 );
             })
             .on('progress', function (progress) {
@@ -117,7 +120,45 @@ async function convertGif2Video(file: IFileInfo, viewContainer: IViewContainer, 
     });
 }
 
-async function convertImage2Video(file: IFileInfo, viewContainer: IViewContainer): Promise<IConvertResutl> {
+function computedImageRenderSize(options: IRenderOptins): {
+    width: number;
+    height: number;
+} {
+    const { input, container } = options;
+    // 图片最小渲染宽度
+    const imageSafeWidth = 750;
+    const renderSize = {
+        width: 0,
+        height: 0,
+    };
+    const containerRatioHW = container.height / container.width;
+    const inputRatioHW = input.height / input.width;
+    if (containerRatioHW > inputRatioHW) {
+        renderSize.width = container.width;
+        renderSize.height = Math.round(
+            (container.width / input.width) * input.height
+        );
+    } else {
+        renderSize.height = container.height;
+        renderSize.width = Math.round(
+            (container.height / input.height) * input.width
+        );
+    }
+
+    if (renderSize.width < imageSafeWidth) {
+        renderSize.width = imageSafeWidth;
+        renderSize.height = Math.round(
+            (imageSafeWidth / input.width) * input.height
+        );
+    }
+
+    return renderSize;
+}
+
+async function convertImage2Video(
+    file: IFileInfo,
+    viewContainer: IViewContainer
+): Promise<IConvertResutl> {
     return {
         file,
         output: '',
@@ -125,22 +166,25 @@ async function convertImage2Video(file: IFileInfo, viewContainer: IViewContainer
             x: 0,
             y: 0,
             width: 0,
-            height: 0
-        }
-    }
-
+            height: 0,
+        },
+    };
 }
 
-const convertHandlers = new Map<string, (...args: any[]) => Promise<IConvertResutl>>([
+const convertHandlers = new Map<
+    string,
+    (...args: any[]) => Promise<IConvertResutl>
+>([
     ['gif', convertGif2Video],
-    ['default', convertImage2Video]
+    ['default', convertImage2Video],
 ]);
 
 export async function convertImage(
     file: IFileInfo,
     viewContainer: IViewContainer
 ): Promise<IConvertResutl> {
-    const handler = convertHandlers.get(file.fileType) || convertHandlers.get('default');
+    const handler =
+        convertHandlers.get(file.fileType) || convertHandlers.get('default');
     return handler!(file, viewContainer);
 }
 
