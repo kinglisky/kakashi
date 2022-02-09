@@ -14,8 +14,8 @@ interface IRenderOptins {
 }
 
 interface IRenderArea {
-    width: number;
     height: number;
+    width: number;
     x: number;
     y: number;
 }
@@ -88,22 +88,22 @@ async function convertGif2Video(
             .on('start', function (commandLine) {
                 console.log('Spawned Ffmpeg with command: ' + commandLine);
             })
-            .on('codecData', function (data) {
-                console.log(
-                    'Input is ' +
-                        data.audio +
-                        ' audio ' +
-                        'with ' +
-                        data.video +
-                        ' video'
-                );
-            })
-            .on('progress', function (progress) {
-                console.log('Processing: ' + progress.percent + '% done');
-            })
-            .on('stderr', function (stderrLine) {
-                console.log('Stderr output: ' + stderrLine);
-            })
+            // .on('codecData', function (data) {
+            //     console.log(
+            //         'Input is ' +
+            //             data.audio +
+            //             ' audio ' +
+            //             'with ' +
+            //             data.video +
+            //             ' video'
+            //     );
+            // })
+            // .on('progress', function (progress) {
+            //     console.log('Processing: ' + progress.percent + '% done');
+            // })
+            // .on('stderr', function (stderrLine) {
+            //     console.log('Stderr output: ' + stderrLine);
+            // })
             .on('error', function (err) {
                 console.log('An error occurred: ' + err.message);
                 reject(err);
@@ -120,10 +120,12 @@ async function convertGif2Video(
     });
 }
 
-function computedImageRenderSize(options: IRenderOptins): {
+interface RenderSize {
     width: number;
     height: number;
-} {
+}
+
+function computedImageRenderSize(options: IRenderOptins): RenderSize {
     const { input, container } = options;
     // 图片最小渲染宽度
     const imageSafeWidth = 750;
@@ -154,11 +156,36 @@ function computedImageRenderSize(options: IRenderOptins): {
 
     return renderSize;
 }
+async function resizeImage(file: IFileInfo, size: RenderSize): Promise<void> {
+    const { path, fileType } = file;
+    const outputPath = path.replace(fileType, `.resize.${fileType}`);
+    return new Promise((resolve, reject) => {
+        sharp(path)
+            .resize(size.width, size.height)
+            .toFile(outputPath, function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+    });
+}
 
 async function convertImage2Video(
     file: IFileInfo,
     viewContainer: IViewContainer
 ): Promise<IConvertResutl> {
+    const meta = await getImageMeta(file.path);
+    const renderSize = computedImageRenderSize({
+        input: {
+            width: meta.width!,
+            height: meta.height!,
+        },
+        container: viewContainer,
+    });
+    await resizeImage(file, renderSize);
+    console.log('resizeImage', file.path);
     return {
         file,
         output: '',
