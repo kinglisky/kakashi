@@ -29,6 +29,7 @@ interface IConvertResutl {
     file: IFileInfo;
     output: string;
     renderArea: IRenderArea;
+    type: 'image' | 'video';
 }
 
 function computedVideoRenderArea(options: IRenderOptins): IRenderArea {
@@ -88,22 +89,6 @@ async function convertGif2Video(
             .on('start', function (commandLine) {
                 console.log('Spawned Ffmpeg with command: ' + commandLine);
             })
-            // .on('codecData', function (data) {
-            //     console.log(
-            //         'Input is ' +
-            //             data.audio +
-            //             ' audio ' +
-            //             'with ' +
-            //             data.video +
-            //             ' video'
-            //     );
-            // })
-            // .on('progress', function (progress) {
-            //     console.log('Processing: ' + progress.percent + '% done');
-            // })
-            // .on('stderr', function (stderrLine) {
-            //     console.log('Stderr output: ' + stderrLine);
-            // })
             .on('error', function (err) {
                 console.log('An error occurred: ' + err.message);
                 reject(err);
@@ -114,6 +99,7 @@ async function convertGif2Video(
                     file,
                     renderArea,
                     output: outputPath,
+                    type: 'video',
                 });
             })
             .save(outputPath);
@@ -156,9 +142,9 @@ function computedImageRenderSize(options: IRenderOptins): RenderSize {
 
     return renderSize;
 }
-async function resizeImage(file: IFileInfo, size: RenderSize): Promise<void> {
+async function resizeImage(file: IFileInfo, size: RenderSize): Promise<string> {
     const { path, fileType } = file;
-    const outputPath = path.replace(fileType, `.resize.${fileType}`);
+    const outputPath = path.replace(fileType, `resize.${fileType}`);
     return new Promise((resolve, reject) => {
         sharp(path)
             .resize(size.width, size.height)
@@ -166,7 +152,7 @@ async function resizeImage(file: IFileInfo, size: RenderSize): Promise<void> {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve();
+                    resolve(outputPath);
                 }
             });
     });
@@ -184,17 +170,17 @@ async function convertImage2Video(
         },
         container: viewContainer,
     });
-    await resizeImage(file, renderSize);
-    console.log('resizeImage', file.path);
+    const output = await resizeImage(file, renderSize);
     return {
         file,
-        output: '',
+        output,
         renderArea: {
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0,
+            x: (viewContainer.width - renderSize.width) / 2,
+            y: Math.max(0, (viewContainer.height - renderSize.height) / 2),
+            width: renderSize.width,
+            height: renderSize.height,
         },
+        type: 'image',
     };
 }
 
