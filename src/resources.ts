@@ -39,9 +39,10 @@ export function fetchComments(): Promise<Array<IComment>> {
                         current
                             .find('.text .view_img_link')
                             .each((_, imageLink) => {
-                                const imageURL = `http:${(imageLink as cheerio.TagElement).attribs
-                                    .href
-                                    }`;
+                                const imageURL = `http:${
+                                    (imageLink as cheerio.TagElement).attribs
+                                        .href
+                                }`;
                                 urls.push(imageURL);
                             });
                         const tucaoLink = current.find(

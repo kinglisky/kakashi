@@ -1,14 +1,5 @@
-import path from 'path';
-import {
-    FFCreatorCenter,
-    FFScene,
-    FFImage,
-    FFText,
-    FFCreator,
-} from 'ffcreatorlite';
-import { IConvertResutl } from './convert';
-const viewWidth = 1920;
-const viewHeight = 1080;
+import { IConvertResutl, IViewContainer } from './convert';
+const { FFCreator, FFScene, FFImage, FFVideo } = require('ffcreatorlite');
 
 export interface ICreateOptions {
     width: number;
@@ -19,14 +10,87 @@ export interface ICreateOptions {
     output: string;
 }
 
-export function createViode(
-    inputs: Array<IConvertResutl>,
-    options: IConvertResutl
+function createImageScene(
+    entry: IConvertResutl,
+    viewContainer: IViewContainer
 ) {
-    // create creator instance
+    const scene = new FFScene();
+    scene.setBgColor('#000000');
+    const { renderArea, output } = entry;
+    const x = (viewContainer.width - renderArea.width) / 2;
+    const image = new FFImage({ path: output, x, y: 0 });
+    let duration = 0;
+    if (renderArea.height > viewContainer.height) {
+        const ty = viewContainer.height - renderArea.height;
+        duration = Math.ceil(ty / 100);
+        image.addAnimate({
+            type: 'move',
+            showType: 'in',
+            time: duration,
+            delay: 0,
+            from: { x, y: 0 },
+            to: { x, y: ty },
+        });
+        scene.addChild(image);
+    } else {
+        image.addEffect({
+            type: 'fadeInDown',
+            time: 1,
+            delay: 0,
+        });
+        duration = 4;
+        scene.addChild(image);
+    }
+
+    scene.setDuration(duration);
+    return scene;
+}
+
+function createVideoScene(
+    entry: IConvertResutl,
+    viewContainer?: IViewContainer
+) {
+    const { output, renderArea } = entry;
+    const scene = new FFScene();
+    scene.setBgColor('#000000');
+    const video = new FFVideo({
+        path: output,
+        x: renderArea.x,
+        y: renderArea.y,
+        width: renderArea.width,
+        height: renderArea.height,
+    });
+    scene.addChild(video);
+    return scene;
+}
+
+function createScene(entry: IConvertResutl, viewContainer: IViewContainer) {
+    const { type } = entry;
+    const creaters = new Map<
+        IConvertResutl['type'],
+        (entry: IConvertResutl, viewContainer: IViewContainer) => any
+    >([
+        ['image', createImageScene],
+        ['video', createVideoScene],
+    ]);
+    const creater = creaters.get(type);
+    return creater!(entry, viewContainer);
+}
+
+export function createViode(
+    entries: Array<IConvertResutl>,
+    options: ICreateOptions
+) {
     const creator = new FFCreator({
         ...options,
         log: true,
+    });
+    entries.forEach((entry) => {
+        const scene = createScene(entry, {
+            width: options.width,
+            height: options.height,
+        });
+        creator.addChild(scene);
     });
     creator.start();
     creator.on('error', (e: any) => {

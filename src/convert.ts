@@ -1,8 +1,9 @@
 import sharp from 'sharp';
 import ffmpeg from 'fluent-ffmpeg';
+import { exists } from './utils';
 import { IFileInfo, IDonwloadItem } from './resources';
 
-interface IRenderOptins {
+export interface IRenderOptins {
     input: {
         width: number;
         height: number;
@@ -13,19 +14,19 @@ interface IRenderOptins {
     };
 }
 
-interface IRenderArea {
+export interface IRenderArea {
     height: number;
     width: number;
     x: number;
     y: number;
 }
 
-interface IViewContainer {
+export interface IViewContainer {
     width: number;
     height: number;
 }
 
-interface IConvertResutl {
+export interface IConvertResutl {
     file: IFileInfo;
     output: string;
     renderArea: IRenderArea;
@@ -80,9 +81,19 @@ async function convertGif2Video(
             height: viewContainer.height,
         },
     });
+    const outputPath = path.replace(fileType, videoType);
+    const size = `${renderArea.width}x${renderArea.height}`;
+    const result: IConvertResutl = {
+        file,
+        renderArea,
+        output: outputPath,
+        type: 'video',
+    };
+    if (await exists(outputPath)) {
+        console.log(`${outputPath} exists skip~`);
+        return result;
+    }
     return new Promise((resolve, reject) => {
-        const outputPath = path.replace(fileType, videoType);
-        const size = `${renderArea.width}x${renderArea.height}`;
         ffmpeg(path)
             .format(videoType)
             .size(size)
@@ -95,12 +106,7 @@ async function convertGif2Video(
             })
             .on('end', function () {
                 console.log('Processing finished !');
-                resolve({
-                    file,
-                    renderArea,
-                    output: outputPath,
-                    type: 'video',
-                });
+                resolve(result);
             })
             .save(outputPath);
     });
@@ -145,6 +151,10 @@ function computedImageRenderSize(options: IRenderOptins): RenderSize {
 async function resizeImage(file: IFileInfo, size: RenderSize): Promise<string> {
     const { path, fileType } = file;
     const outputPath = path.replace(fileType, `resize.${fileType}`);
+    if (await exists(outputPath)) {
+        console.log(`${outputPath} exists skip~`);
+        return outputPath;
+    }
     return new Promise((resolve, reject) => {
         sharp(path)
             .resize(size.width, size.height)
