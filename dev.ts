@@ -16,12 +16,15 @@ import { createViode } from './src/index';
         height: 1080,
     });
     console.log('done', res);
-    createViode(res.slice(0, 10), {
+    createViode(res.slice(0, 20), {
         width: 1920,
         height: 1080,
         output: 'output.mp4',
         outputDir: path.join(__dirname, './output'),
         cacheDir: path.join(__dirname, './cache'),
         fps: 60,
+        audio: {
+            path: path.join(__dirname, './assets/emaru.mp3'),
+        },
     });
 })();

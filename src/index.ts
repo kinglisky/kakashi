@@ -8,6 +8,9 @@ export interface ICreateOptions {
     cacheDir: string;
     outputDir: string;
     output: string;
+    audio: {
+        path: string;
+    };
 }
 
 function createImageScene(
@@ -33,12 +36,8 @@ function createImageScene(
         });
         scene.addChild(image);
     } else {
-        image.addEffect({
-            type: 'fadeInDown',
-            time: 1,
-            delay: 0,
-        });
-        duration = 4;
+        // image.addEffect('fadeIn', 1, 1);
+        duration = 2;
         scene.addChild(image);
     }
 
@@ -81,10 +80,13 @@ export function createViode(
     entries: Array<IConvertResutl>,
     options: ICreateOptions
 ) {
+    const { audio, ...createOptions } = options;
     const creator = new FFCreator({
-        ...options,
+        ...createOptions,
         log: true,
     });
+    console.log(audio.path);
+    creator.addAudio(audio.path);
     entries.forEach((entry) => {
         const scene = createScene(entry, {
             width: options.width,
