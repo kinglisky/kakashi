@@ -7,6 +7,7 @@
         "tsc": "tsc --watch",
         "dev": "ts-node-dev dev.ts",
         "test": "ts-node-dev test.ts",
+        "cmd": "ts-node-dev cmd.ts",
         "dev:watch": "ts-node-dev --respawn --inspect -- src/index.ts",
         "start": "nodemon -e ts --exec \"ts-node-dev src/index.ts\""
     },
