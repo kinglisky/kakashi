@@ -1,6 +1,6 @@
 import sharp from 'sharp';
-import ffmpeg from 'fluent-ffmpeg';
 import { exists } from './utils';
+import { gif2Video, scrollImage2Video, staticImage2Video } from './ffmpeg';
 import { IFileInfo, IDonwloadItem } from './resources';
 
 export interface IRenderOptins {
@@ -31,6 +31,7 @@ export interface IConvertResutl {
     output: string;
     renderArea: IRenderArea;
     type: 'image' | 'video';
+    duration?: number;
 }
 
 function computedVideoRenderArea(options: IRenderOptins): IRenderArea {
@@ -53,6 +54,13 @@ function computedVideoRenderArea(options: IRenderOptins): IRenderArea {
         renderArea.width = Math.round(
             (container.height / input.height) * input.width
         );
+    }
+    // 确保只有偶数尺寸
+    if (renderArea.width % 2 !== 0) {
+        renderArea.width -= 1;
+    }
+    if (renderArea.height % 2 !== 0) {
+        renderArea.height -= 1;
     }
 
     renderArea.x = Math.round((container.width - renderArea.width) / 2);
@@ -93,31 +101,22 @@ async function convertGif2Video(
         console.log(`${outputPath} exists skip~`);
         return result;
     }
-    return new Promise((resolve, reject) => {
-        ffmpeg(path)
-            .format(videoType)
-            .size(size)
-            .on('start', function (commandLine) {
-                console.log('Spawned Ffmpeg with command: ' + commandLine);
-            })
-            .on('error', function (err) {
-                console.log('An error occurred: ' + err.message);
-                reject(err);
-            })
-            .on('end', function () {
-                console.log('Processing finished !');
-                resolve(result);
-            })
-            .save(outputPath);
+    const duration = await gif2Video({
+        input: path,
+        output: outputPath,
+        format: videoType,
+        size,
     });
+    result.duration = duration;
+    return result;
 }
 
-interface RenderSize {
+export interface IRenderSize {
     width: number;
     height: number;
 }
 
-function computedImageRenderSize(options: IRenderOptins): RenderSize {
+function computedImageRenderSize(options: IRenderOptins): IRenderSize {
     const { input, container } = options;
     // 图片最小渲染宽度
     const imageSafeWidth = 750;
@@ -145,10 +144,20 @@ function computedImageRenderSize(options: IRenderOptins): RenderSize {
             (imageSafeWidth / input.width) * input.height
         );
     }
-
+    // 确保只有偶数尺寸
+    if (renderSize.width % 2 !== 0) {
+        renderSize.width -= 1;
+    }
+    if (renderSize.height % 2 !== 0) {
+        renderSize.height -= 1;
+    }
     return renderSize;
 }
-async function resizeImage(file: IFileInfo, size: RenderSize): Promise<string> {
+
+async function resizeImage(
+    file: IFileInfo,
+    size: IRenderSize
+): Promise<string> {
     const { path, fileType } = file;
     const outputPath = path.replace(fileType, `resize.${fileType}`);
     if (await exists(outputPath)) {
@@ -180,17 +189,36 @@ async function convertImage2Video(
         },
         container: viewContainer,
     });
-    const output = await resizeImage(file, renderSize);
+    const resizeImagePath = await resizeImage(file, renderSize);
+    const outputPath = resizeImagePath.replace(file.fileType, 'mp4');
+    const isLongImage = renderSize.height > viewContainer.height;
+    let duration = 0;
+    if (isLongImage) {
+        duration = await scrollImage2Video({
+            input: resizeImagePath,
+            output: outputPath,
+            imageSzie: renderSize,
+            container: viewContainer,
+        });
+        renderSize.height = viewContainer.height;
+    } else {
+        duration = await staticImage2Video({
+            input: resizeImagePath,
+            output: outputPath,
+            duration: 4,
+        });
+    }
     return {
         file,
-        output,
+        output: outputPath,
         renderArea: {
             x: (viewContainer.width - renderSize.width) / 2,
             y: Math.max(0, (viewContainer.height - renderSize.height) / 2),
             width: renderSize.width,
             height: renderSize.height,
         },
-        type: 'image',
+        type: 'video',
+        duration,
     };
 }
 

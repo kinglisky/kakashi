@@ -20,28 +20,13 @@ function createImageScene(
     const scene = new FFScene();
     scene.setBgColor('#000000');
     const { renderArea, output } = entry;
-    const x = (viewContainer.width - renderArea.width) / 2;
-    const image = new FFImage({ path: output, x, y: 0 });
-    let duration = 0;
-    if (renderArea.height > viewContainer.height) {
-        const ty = viewContainer.height - renderArea.height;
-        duration = Math.ceil(ty / 100);
-        image.addAnimate({
-            type: 'move',
-            showType: 'in',
-            time: duration,
-            delay: 0,
-            from: { x, y: 0 },
-            to: { x, y: ty },
-        });
-        scene.addChild(image);
-    } else {
-        // image.addEffect('fadeIn', 1, 1);
-        duration = 2;
-        scene.addChild(image);
-    }
-
-    scene.setDuration(duration);
+    const image = new FFImage({
+        path: output,
+        x: renderArea.x,
+        y: renderArea.y,
+    });
+    scene.addChild(image);
+    scene.setDuration(2);
     return scene;
 }
 
@@ -60,6 +45,7 @@ function createVideoScene(
         height: renderArea.height,
     });
     scene.addChild(video);
+    scene.setDuration(entry.duration!);
     return scene;
 }
 
