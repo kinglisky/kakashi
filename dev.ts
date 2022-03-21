@@ -1,33 +1,48 @@
+import fs from 'fs';
 import path from 'path';
 import {
     fetchComments,
-    downloadComments,
+    downloadResources,
+    filterResources,
     IFileInfo,
-    IDonwloadItem,
+    IResourcesItem,
 } from './src/resources';
 import { convertImages, IConvertResutl } from './src/convert';
 import { createViode } from './src/index';
 
+function randomBackgroundMusic(assetsPath: string) {
+    const res = fs.readdirSync(assetsPath);
+    const index = Math.floor(Math.random() * res.length);
+    return res[index];
+}
+
 (async function () {
+    const width = 1920;
+    const height = 1080;
     const comments = await fetchComments();
-    console.log(comments);
-    const items = await downloadComments(comments.slice(4, 10));
-    const res = await convertImages(items, {
-        width: 750,
-        height: 1080,
+    const sourceItems = await downloadResources(comments);
+    const filtedItems = await filterResources(sourceItems, {
+        sourceDir: 'download',
+        targetDir: 'useful',
     });
-    console.log('done', res);
-    setTimeout(() => {
-        createViode(res, {
-            width: 750,
-            height: 1080,
-            output: 'output.mp4',
-            outputDir: path.join(__dirname, './output'),
-            cacheDir: path.join(__dirname, './cache'),
-            fps: 60,
-            audio: {
-                path: path.join(__dirname, './assets/test.mp3'),
-            },
-        });
-    }, 400);
+    // const res = await convertImages(items, {
+    //     width,
+    //     height,
+    // });
+    // console.log(items.length, res.length);
+    console.log(sourceItems.length, filtedItems.length);
+    // setTimeout(() => {
+    //     const musicPath = randomBackgroundMusic(path.join(__dirname, './assets'));
+    //     createViode(res, {
+    //         width,
+    //         height,
+    //         output: 'output.mp4',
+    //         outputDir: path.join(__dirname, './output'),
+    //         cacheDir: path.join(__dirname, './cache'),
+    //         fps: 60,
+    //         audio: {
+    //             path: musicPath,
+    //         },
+    //     });
+    // }, 400);
 })();

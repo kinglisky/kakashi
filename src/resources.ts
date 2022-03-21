@@ -13,7 +13,7 @@ export interface IFileInfo {
     fileName: string;
     fileType: string;
 }
-export interface IDonwloadItem {
+export interface IResourcesItem {
     data: any;
     files: Array<IFileInfo>;
 }
@@ -36,18 +36,13 @@ export function fetchComments(): Promise<Array<IComment>> {
                     $('#comments ol li .row').each((_, it) => {
                         const current = $(it);
                         const urls: Array<string> = [];
-                        current
-                            .find('.text .view_img_link')
-                            .each((_, imageLink) => {
-                                const imageURL = `http:${
-                                    (imageLink as cheerio.TagElement).attribs
-                                        .href
-                                }`;
-                                urls.push(imageURL);
-                            });
-                        const tucaoLink = current.find(
-                            '.tucao-btn'
-                        )[0] as cheerio.TagElement;
+                        current.find('.text .view_img_link').each((_, imageLink) => {
+                            const imageURL = `http:${
+                                (imageLink as cheerio.TagElement).attribs.href
+                            }`;
+                            urls.push(imageURL);
+                        });
+                        const tucaoLink = current.find('.tucao-btn')[0] as cheerio.TagElement;
                         items.push({
                             urls,
                             id: tucaoLink.attribs['data-id'],
@@ -61,23 +56,20 @@ export function fetchComments(): Promise<Array<IComment>> {
 }
 
 export function loadComment(id: string): Promise<any> {
-    return axios
-        .get(`http://jandan.net/api/tucao/list/${id}`)
-        .then(({ data }) => data.hot_tucao);
+    return axios.get(`http://jandan.net/api/tucao/list/${id}`).then(({ data }) => data.hot_tucao);
 }
 
-export function downloadCommentImages(
+export function downloadImages(
     urls: Array<string>,
-    dir: string,
-    id: string
-): Promise<IDonwloadItem['files']> {
+    id: string,
+    outputDir: string = 'download'
+): Promise<IResourcesItem['files']> {
     const tasks = urls.map(async (url, index) => {
         console.log(`download: ${url}`);
         // 配置 .xxx 后缀
         const matchFile = url.match(/\.(\w+)$/);
         const fileName = `${id}-${index}${matchFile![0]}`;
         const fileType = matchFile![1].toLowerCase();
-        const outputDir = `download/${dir}`;
         const outputPath = `${outputDir}/${fileName}`;
         const res = {
             url,
@@ -97,18 +89,37 @@ export function downloadCommentImages(
     return Promise.all(tasks);
 }
 
-export async function downloadComments(
-    comments: Array<IComment>
-): Promise<Array<IDonwloadItem>> {
-    const date = new Date().toLocaleDateString().replace(/\//g, '');
+export async function downloadResources(comments: Array<IComment>): Promise<Array<IResourcesItem>> {
     const tasks = comments.map((item) => {
         const { urls, id } = item;
-        return Promise.all([
-            downloadCommentImages(urls, date, id),
-            loadComment(id),
-        ]).then(([files, data]) => ({ files, data }));
+        return Promise.all([downloadImages(urls, id), loadComment(id)]).then(([files, data]) => ({
+            files,
+            data,
+        }));
     });
     const res = await Promise.all(tasks);
     await writeFile('comments.josn', JSON.stringify(res, null, 4));
     return res;
+}
+
+export async function filterResources(
+    resources: IResourcesItem[],
+    options: { sourceDir: string; targetDir: string }
+): Promise<IResourcesItem[]> {
+    const filtedResources: IResourcesItem[] = [];
+    await resources.reduce(async (promise, item) => {
+        await promise;
+        const { files } = item;
+        const { sourceDir, targetDir } = options;
+        const tasks = files.map((file) => {
+            const targetPath = file.path.replace(sourceDir, targetDir);
+            console.log(`filter: ${targetPath}`);
+            return exists(targetPath);
+        });
+        const res = await Promise.all(tasks);
+        if (res.every((it) => it)) {
+            filtedResources.push(item);
+        }
+    }, Promise.resolve());
+    return filtedResources;
 }

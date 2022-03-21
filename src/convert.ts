@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import { exists } from './utils';
 import { gif2Video, scrollImage2Video, staticImage2Video } from './ffmpeg';
-import { IFileInfo, IDonwloadItem } from './resources';
+import { IFileInfo, IResourcesItem } from './resources';
 
 export interface IRenderOptins {
     input: {
@@ -31,7 +31,7 @@ export interface IConvertResutl {
     output: string;
     renderArea: IRenderArea;
     type: 'image' | 'video';
-    duration?: number;
+    duration: number;
 }
 
 function computedVideoRenderArea(options: IRenderOptins): IRenderArea {
@@ -46,14 +46,10 @@ function computedVideoRenderArea(options: IRenderOptins): IRenderArea {
     const inputRatioHW = input.height / input.width;
     if (containerRatioHW > inputRatioHW) {
         renderArea.width = container.width;
-        renderArea.height = Math.round(
-            (container.width / input.width) * input.height
-        );
+        renderArea.height = Math.round((container.width / input.width) * input.height);
     } else {
         renderArea.height = container.height;
-        renderArea.width = Math.round(
-            (container.height / input.height) * input.width
-        );
+        renderArea.width = Math.round((container.height / input.height) * input.width);
     }
     // 确保只有偶数尺寸
     if (renderArea.width % 2 !== 0) {
@@ -89,13 +85,14 @@ async function convertGif2Video(
             height: viewContainer.height,
         },
     });
-    const outputPath = path.replace(fileType, videoType);
     const size = `${renderArea.width}x${renderArea.height}`;
+    const outputPath = path.replace(fileType, `${size}}.${videoType}`);
     const result: IConvertResutl = {
         file,
         renderArea,
         output: outputPath,
         type: 'video',
+        duration: 0,
     };
     if (await exists(outputPath)) {
         console.log(`${outputPath} exists skip~`);
@@ -128,21 +125,15 @@ function computedImageRenderSize(options: IRenderOptins): IRenderSize {
     const inputRatioHW = input.height / input.width;
     if (containerRatioHW > inputRatioHW) {
         renderSize.width = container.width;
-        renderSize.height = Math.round(
-            (container.width / input.width) * input.height
-        );
+        renderSize.height = Math.round((container.width / input.width) * input.height);
     } else {
         renderSize.height = container.height;
-        renderSize.width = Math.round(
-            (container.height / input.height) * input.width
-        );
+        renderSize.width = Math.round((container.height / input.height) * input.width);
     }
 
     if (renderSize.width < imageSafeWidth) {
         renderSize.width = imageSafeWidth;
-        renderSize.height = Math.round(
-            (imageSafeWidth / input.width) * input.height
-        );
+        renderSize.height = Math.round((imageSafeWidth / input.width) * input.height);
     }
     // 确保只有偶数尺寸
     if (renderSize.width % 2 !== 0) {
@@ -154,12 +145,9 @@ function computedImageRenderSize(options: IRenderOptins): IRenderSize {
     return renderSize;
 }
 
-async function resizeImage(
-    file: IFileInfo,
-    size: IRenderSize
-): Promise<string> {
+async function resizeImage(file: IFileInfo, size: IRenderSize): Promise<string> {
     const { path, fileType } = file;
-    const outputPath = path.replace(fileType, `resize.${fileType}`);
+    const outputPath = path.replace(fileType, `${size.width}x${size.height}.${fileType}`);
     if (await exists(outputPath)) {
         console.log(`${outputPath} exists skip~`);
         return outputPath;
@@ -222,10 +210,7 @@ async function convertImage2Video(
     };
 }
 
-const convertHandlers = new Map<
-    string,
-    (...args: any[]) => Promise<IConvertResutl>
->([
+const convertHandlers = new Map<string, (...args: any[]) => Promise<IConvertResutl>>([
     ['gif', convertGif2Video],
     ['default', convertImage2Video],
 ]);
@@ -234,13 +219,12 @@ export async function convertImage(
     file: IFileInfo,
     viewContainer: IViewContainer
 ): Promise<IConvertResutl> {
-    const handler =
-        convertHandlers.get(file.fileType) || convertHandlers.get('default');
+    const handler = convertHandlers.get(file.fileType) || convertHandlers.get('default');
     return handler!(file, viewContainer);
 }
 
 export async function convertImages(
-    downloadList: Array<IDonwloadItem>,
+    downloadList: Array<IResourcesItem>,
     viewContainer: IViewContainer
 ): Promise<Array<IConvertResutl>> {
     const res: Array<IConvertResutl> = [];
