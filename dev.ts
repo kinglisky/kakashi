@@ -34,7 +34,7 @@ function randomBackgroundMusic(assetsPath: string) {
             fps: 60,
             audio: {
                 // path: path.join(__dirname, `./assets/${musicName}`),
-                path: path.join(__dirname, './assets/08.mp3'),
+                path: path.join(__dirname, './assets/8.mp3'),
             },
         });
     }, 400);

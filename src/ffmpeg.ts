@@ -71,7 +71,7 @@ export async function scrollImage2Video(options: ScrollImageToVideoOptions): Pro
     const { input, output, imageSzie, container } = options;
     if (!(await exists(output))) {
         const dh = imageSzie.height - container.height;
-        const minDuration = 4;
+        const minDuration = 6;
         const maxSpeed = Math.floor(dh / minDuration);
         const speed = Math.min(60, maxSpeed);
         const duration = Math.ceil((imageSzie.height - container.height) / speed);
