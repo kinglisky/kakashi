@@ -8,15 +8,12 @@ export interface ICreateOptions {
     cacheDir: string;
     outputDir: string;
     output: string;
-    audio: {
+    audio?: {
         path: string;
     };
 }
 
-function createImageScene(
-    entry: IConvertResutl,
-    viewContainer: IViewContainer
-) {
+function createImageScene(entry: IConvertResutl, viewContainer: IViewContainer) {
     const scene = new FFScene();
     scene.setBgColor('#000000');
     const { renderArea, output } = entry;
@@ -30,10 +27,7 @@ function createImageScene(
     return scene;
 }
 
-function createVideoScene(
-    entry: IConvertResutl,
-    viewContainer?: IViewContainer
-) {
+function createVideoScene(entry: IConvertResutl, viewContainer?: IViewContainer) {
     const { output, renderArea } = entry;
     const scene = new FFScene();
     scene.setBgColor('#000000');
@@ -62,17 +56,17 @@ function createScene(entry: IConvertResutl, viewContainer: IViewContainer) {
     return creater!(entry, viewContainer);
 }
 
-export function createViode(
-    entries: Array<IConvertResutl>,
-    options: ICreateOptions
-) {
+export function createViode(entries: Array<IConvertResutl>, options: ICreateOptions) {
     const { audio, ...createOptions } = options;
     const creator = new FFCreator({
         ...createOptions,
         log: true,
     });
-    console.log(audio.path);
-    creator.addAudio(audio.path);
+    if (audio?.path) {
+        console.log(audio.path);
+        creator.addAudio(audio.path);
+    }
+
     entries.forEach((entry) => {
         const scene = createScene(entry, {
             width: options.width,
@@ -89,8 +83,6 @@ export function createViode(
     });
 
     creator.on('complete', (e: any) => {
-        console.log(
-            `FFCreatorLite completed: \n USEAGE: ${e.useage} \n PATH: ${e.output} `
-        );
+        console.log(`FFCreatorLite completed: \n USEAGE: ${e.useage} \n PATH: ${e.output} `);
     });
 }

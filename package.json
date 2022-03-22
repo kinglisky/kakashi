@@ -6,6 +6,7 @@
     "scripts": {
         "tsc": "tsc --watch",
         "dev": "ts-node-dev dev.ts",
+        "download": "ts-node-dev download.ts",
         "test": "ts-node-dev test.ts",
         "cmd": "ts-node-dev cmd.ts",
         "dev:watch": "ts-node-dev --respawn --inspect -- src/index.ts",

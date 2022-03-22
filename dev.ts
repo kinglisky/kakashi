@@ -1,14 +1,9 @@
 import fs from 'fs';
 import path from 'path';
-import {
-    fetchComments,
-    downloadResources,
-    filterResources,
-    IFileInfo,
-    IResourcesItem,
-} from './src/resources';
+import { checkResources, IFileInfo, IResourcesItem } from './src/resources';
 import { convertImages, IConvertResutl } from './src/convert';
 import { createViode } from './src/index';
+import resources from './resources.json';
 
 function randomBackgroundMusic(assetsPath: string) {
     const res = fs.readdirSync(assetsPath);
@@ -19,30 +14,28 @@ function randomBackgroundMusic(assetsPath: string) {
 (async function () {
     const width = 1920;
     const height = 1080;
-    const comments = await fetchComments();
-    const sourceItems = await downloadResources(comments);
-    const filtedItems = await filterResources(sourceItems, {
+    const checkedItems = await checkResources(resources, {
         sourceDir: 'download',
         targetDir: 'useful',
     });
-    // const res = await convertImages(items, {
-    //     width,
-    //     height,
-    // });
-    // console.log(items.length, res.length);
-    console.log(sourceItems.length, filtedItems.length);
-    // setTimeout(() => {
-    //     const musicPath = randomBackgroundMusic(path.join(__dirname, './assets'));
-    //     createViode(res, {
-    //         width,
-    //         height,
-    //         output: 'output.mp4',
-    //         outputDir: path.join(__dirname, './output'),
-    //         cacheDir: path.join(__dirname, './cache'),
-    //         fps: 60,
-    //         audio: {
-    //             path: musicPath,
-    //         },
-    //     });
-    // }, 400);
+    const res = await convertImages(checkedItems, {
+        width,
+        height,
+    });
+    console.log(checkedItems.length, res.length);
+    setTimeout(() => {
+        const musicName = randomBackgroundMusic(path.join(__dirname, './assets'));
+        createViode(res, {
+            width,
+            height,
+            output: 'output.mp4',
+            outputDir: path.join(__dirname, './output'),
+            cacheDir: path.join(__dirname, './cache'),
+            fps: 60,
+            audio: {
+                // path: path.join(__dirname, `./assets/${musicName}`),
+                path: path.join(__dirname, './assets/08.mp3'),
+            },
+        });
+    }, 400);
 })();

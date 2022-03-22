@@ -86,7 +86,7 @@ async function convertGif2Video(
         },
     });
     const size = `${renderArea.width}x${renderArea.height}`;
-    const outputPath = path.replace(fileType, `${size}}.${videoType}`);
+    const outputPath = path.replace(`.${fileType}`, `-${size}.${videoType}`);
     const result: IConvertResutl = {
         file,
         renderArea,
@@ -147,7 +147,7 @@ function computedImageRenderSize(options: IRenderOptins): IRenderSize {
 
 async function resizeImage(file: IFileInfo, size: IRenderSize): Promise<string> {
     const { path, fileType } = file;
-    const outputPath = path.replace(fileType, `${size.width}x${size.height}.${fileType}`);
+    const outputPath = path.replace(`.${fileType}`, `-${size.width}x${size.height}.${fileType}`);
     if (await exists(outputPath)) {
         console.log(`${outputPath} exists skip~`);
         return outputPath;
@@ -193,7 +193,7 @@ async function convertImage2Video(
         duration = await staticImage2Video({
             input: resizeImagePath,
             output: outputPath,
-            duration: 4,
+            duration: 6,
         });
     }
     return {

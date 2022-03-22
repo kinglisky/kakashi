@@ -98,11 +98,11 @@ export async function downloadResources(comments: Array<IComment>): Promise<Arra
         }));
     });
     const res = await Promise.all(tasks);
-    await writeFile('comments.josn', JSON.stringify(res, null, 4));
+    await writeFile('resources.json', JSON.stringify(res, null, 4));
     return res;
 }
 
-export async function filterResources(
+export async function checkResources(
     resources: IResourcesItem[],
     options: { sourceDir: string; targetDir: string }
 ): Promise<IResourcesItem[]> {
@@ -113,8 +113,13 @@ export async function filterResources(
         const { sourceDir, targetDir } = options;
         const tasks = files.map((file) => {
             const targetPath = file.path.replace(sourceDir, targetDir);
-            console.log(`filter: ${targetPath}`);
-            return exists(targetPath);
+            console.log(`check: ${targetPath}`);
+            return exists(targetPath).then((existed) => {
+                if (existed) {
+                    file.path = targetPath;
+                }
+                return existed;
+            });
         });
         const res = await Promise.all(tasks);
         if (res.every((it) => it)) {

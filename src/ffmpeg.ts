@@ -66,18 +66,17 @@ interface ScrollImageToVideoOptions {
     container: IViewContainer;
 }
 
-export async function scrollImage2Video(
-    options: ScrollImageToVideoOptions
-): Promise<number> {
+export async function scrollImage2Video(options: ScrollImageToVideoOptions): Promise<number> {
     console.log('scrollImage2Video', options);
     const { input, output, imageSzie, container } = options;
     if (!(await exists(output))) {
-        const spped = 120;
-        const duration = Math.ceil(
-            (imageSzie.height - container.height) / spped
-        );
+        const dh = imageSzie.height - container.height;
+        const minDuration = 4;
+        const maxSpeed = Math.floor(dh / minDuration);
+        const speed = Math.min(60, maxSpeed);
+        const duration = Math.ceil((imageSzie.height - container.height) / speed);
         const size = `${imageSzie.width}x${container.height}`;
-        const cmd = `ffmpeg -loop 1 -t ${duration} -i ${input} -filter_complex "color=white:s=${size},fps=fps=60[bg];[bg][0]overlay=y=-'t\*${spped}':shortest=1[video]" -r 200/1 -preset ultrafast -map [video] -y ${output}`;
+        const cmd = `ffmpeg -loop 1 -t ${duration} -i ${input} -filter_complex "color=white:s=${size},fps=fps=60[bg];[bg][0]overlay=y=-'t\*${speed}':shortest=1[video]" -r 200/1 -preset ultrafast -map [video] -y ${output}`;
         console.log(`run scrollImage2Video: ${cmd}`);
         await run(cmd);
         return duration;
@@ -92,9 +91,7 @@ interface StaticImageToVideoOptions {
     duration: number;
 }
 
-export async function staticImage2Video(
-    options: StaticImageToVideoOptions
-): Promise<number> {
+export async function staticImage2Video(options: StaticImageToVideoOptions): Promise<number> {
     console.log(`run staticImage2Video:`, options);
     const { input, output, duration } = options;
     if (!(await exists(output))) {
