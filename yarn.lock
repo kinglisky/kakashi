@@ -102,10 +102,22 @@
     "@types/got" "^8"
     "@types/node" "*"
 
+"@types/find-remove@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.npmmirror.com/@types/find-remove/-/find-remove-2.0.1.tgz#d0ff099a0d9d6e2aa9d3d3736593b8f122fb4a33"
+  integrity sha512-x5dgfuPpdD7Knfu1aN/iaO0JiC2c5rpGFrq/k6H0gDrrTtTBt+e047k3OSEhXJFFggE/RN9SbqTEDoxDn2BoFA==
+
 "@types/fluent-ffmpeg@^2.1.20":
   version "2.1.20"
   resolved "https://registry.npmmirror.com/@types/fluent-ffmpeg/download/@types/fluent-ffmpeg-2.1.20.tgz#3b5f42fc8263761d58284fa46ee6759a64ce54ac"
   integrity sha512-B+OvhCdJ3LgEq2PhvWNOiB/EfwnXLElfMCgc4Z1K5zXgSfo9I6uGKwR/lqmNPFQuebNnes7re3gqkV77SyypLg==
+  dependencies:
+    "@types/node" "*"
+
+"@types/fs-extra@^9.0.13":
+  version "9.0.13"
+  resolved "https://registry.npmmirror.com/@types/fs-extra/-/fs-extra-9.0.13.tgz#7594fbae04fe7f1918ce8b3d213f74ff44ac1f45"
+  integrity sha512-nEnwB++1u5lVDM2UI4c1+5R+FYaKfaAzS4OococimjVm3nQw3TuzH5UNsocrcTBbhnerblyHj4A49qXbIiZdpA==
   dependencies:
     "@types/node" "*"
 
@@ -1067,6 +1079,14 @@ fill-range@^7.0.1:
   dependencies:
     to-regex-range "^5.0.1"
 
+find-remove@^4.0.4:
+  version "4.0.4"
+  resolved "https://registry.npmmirror.com/find-remove/-/find-remove-4.0.4.tgz#580078e21fdbb5b73c0a045607fe139f07e6c26b"
+  integrity sha512-IVHi4dBLofdjv8xdL4mPDyLj80KY6Y3FcmKzFSJJyvJYbGGJRWtW6DC74GegI0K/1wZod5PAc46eY7oVkM4kzg==
+  dependencies:
+    fmerge "1.2.0"
+    rimraf "3.0.2"
+
 fluent-ffmpeg@^2.1.2:
   version "2.1.2"
   resolved "https://registry.npmmirror.com/fluent-ffmpeg/download/fluent-ffmpeg-2.1.2.tgz#c952de2240f812ebda0aa8006d7776ee2acf7d74"
@@ -1074,6 +1094,11 @@ fluent-ffmpeg@^2.1.2:
   dependencies:
     async ">=0.2.9"
     which "^1.1.1"
+
+fmerge@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.npmmirror.com/fmerge/-/fmerge-1.2.0.tgz#36e99d2ae255e3ee1af666b4df780553671cf692"
+  integrity sha512-ByFA9Pg++TFyB+MlYTEQ/FF/hpEVYjr56xWOpSzCxsjkwfWC7miNIgJAFj3cNbhtn/vusqyen55M8Bg7t3lYiA==
 
 follow-redirects@^1.14.4:
   version "1.14.7"
@@ -1106,6 +1131,15 @@ fs-constants@^1.0.0:
   version "1.0.0"
   resolved "https://registry.nlark.com/fs-constants/download/fs-constants-1.0.0.tgz#6be0de9be998ce16af8afc24497b9ee9b7ccd9ad"
   integrity sha1-a+Dem+mYzhavivwkSXue6bfM2a0=
+
+fs-extra@^10.0.1:
+  version "10.0.1"
+  resolved "https://registry.npmmirror.com/fs-extra/-/fs-extra-10.0.1.tgz#27de43b4320e833f6867cc044bfce29fdf0ef3b8"
+  integrity sha512-NbdoVMZso2Lsrn/QwLXOy6rm0ufY2zEOKCDzJR/0kBsb0E6qed0P3iYK+Ath3BfvXEeu4JhEtXLgILx5psUfag==
+  dependencies:
+    graceful-fs "^4.2.0"
+    jsonfile "^6.0.1"
+    universalify "^2.0.0"
 
 fs-extra@^9.0.1:
   version "9.1.0"
@@ -2267,17 +2301,17 @@ reusify@^1.0.4:
   resolved "https://registry.npm.taobao.org/reusify/download/reusify-1.0.4.tgz#90da382b1e126efc02146e90845a88db12925d76"
   integrity sha1-kNo4Kx4SbvwCFG6QhFqI2xKSXXY=
 
+rimraf@3.0.2, rimraf@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.npmmirror.com/rimraf/-/rimraf-3.0.2.tgz#f1a5402ba6220ad52cc1282bac1ae3aa49fd061a"
+  integrity sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==
+  dependencies:
+    glob "^7.1.3"
+
 rimraf@^2.6.1, rimraf@^2.6.2:
   version "2.7.1"
   resolved "https://registry.npmmirror.com/rimraf/download/rimraf-2.7.1.tgz#35797f13a7fdadc566142c29d4f07ccad483e3ec"
   integrity sha1-NXl/E6f9rcVmFCwp1PB8ytSD4+w=
-  dependencies:
-    glob "^7.1.3"
-
-rimraf@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.npmmirror.com/rimraf/download/rimraf-3.0.2.tgz#f1a5402ba6220ad52cc1282bac1ae3aa49fd061a"
-  integrity sha1-8aVAK6YiCtUswSgrrBrjqkn9Bho=
   dependencies:
     glob "^7.1.3"
 

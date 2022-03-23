@@ -12,8 +12,8 @@ function randomBackgroundMusic(assetsPath: string) {
 }
 
 (async function () {
-    const width = 1920;
-    const height = 1080;
+    const width = 750;
+    const height = 1468;
     const checkedItems = await checkResources(resources, {
         sourceDir: 'download',
         targetDir: 'useful',
@@ -33,8 +33,8 @@ function randomBackgroundMusic(assetsPath: string) {
             cacheDir: path.join(__dirname, './cache'),
             fps: 60,
             audio: {
-                // path: path.join(__dirname, `./assets/${musicName}`),
-                path: path.join(__dirname, './assets/8.mp3'),
+                path: path.join(__dirname, `./assets/${musicName}`),
+                // path: path.join(__dirname, './assets/2.mp3'),
             },
         });
     }, 400);

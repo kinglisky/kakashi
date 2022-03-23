@@ -2,6 +2,7 @@ import sharp from 'sharp';
 import { exists } from './utils';
 import { gif2Video, scrollImage2Video, staticImage2Video } from './ffmpeg';
 import { IFileInfo, IResourcesItem } from './resources';
+import { IMAGE_DURATION } from './constants';
 
 export interface IRenderOptins {
     input: {
@@ -193,7 +194,7 @@ async function convertImage2Video(
         duration = await staticImage2Video({
             input: resizeImagePath,
             output: outputPath,
-            duration: 6,
+            duration: IMAGE_DURATION,
         });
     }
     return {

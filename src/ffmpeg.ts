@@ -2,6 +2,7 @@ import util from 'util';
 import ffmpeg from 'fluent-ffmpeg';
 import { exec } from 'child_process';
 import { exists } from './utils';
+import { IMAGE_DURATION } from './constants';
 import { IViewContainer, IRenderSize } from './convert';
 
 const run = util.promisify(exec);
@@ -71,7 +72,7 @@ export async function scrollImage2Video(options: ScrollImageToVideoOptions): Pro
     const { input, output, imageSzie, container } = options;
     if (!(await exists(output))) {
         const dh = imageSzie.height - container.height;
-        const minDuration = 6;
+        const minDuration = IMAGE_DURATION;
         const maxSpeed = Math.floor(dh / minDuration);
         const speed = Math.min(60, maxSpeed);
         const duration = Math.ceil((imageSzie.height - container.height) / speed);

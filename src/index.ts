@@ -38,6 +38,7 @@ function createVideoScene(entry: IConvertResutl, viewContainer?: IViewContainer)
         width: renderArea.width,
         height: renderArea.height,
     });
+    // video.addEffect('fadeIn', 0.1, 0);
     scene.addChild(video);
     scene.setDuration(entry.duration!);
     return scene;
