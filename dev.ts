@@ -12,8 +12,8 @@ function randomBackgroundMusic(assetsPath: string) {
 }
 
 (async function () {
-    const width = 750;
-    const height = 1468;
+    const width = 1080;
+    const height = 1920;
     const checkedItems = await checkResources(resources, {
         sourceDir: 'download',
         targetDir: 'useful',
@@ -28,7 +28,7 @@ function randomBackgroundMusic(assetsPath: string) {
         createViode(res, {
             width,
             height,
-            output: 'output.mp4',
+            output: '人类观察日记.mp4',
             outputDir: path.join(__dirname, './output'),
             cacheDir: path.join(__dirname, './cache'),
             fps: 60,
