@@ -1,6 +1,6 @@
 # kakashi
 
-简单无聊图搬运~
+煎蛋无聊图搬运~
 
 ffmpeg -loop 1 -t 25 -i input.jpg -filter_complex "color=white:s=750x1080,fps=fps=60[bg];[bg][0]overlay=y=-'t\*120':shortest=1[video]" -r 200/1 -preset ultrafast -map[video] -y "output.mp4"
 
