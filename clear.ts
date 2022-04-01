@@ -1,6 +1,5 @@
-import fs from 'fs-extra';
 import findRemoveSync from 'find-remove';
-import { resolve, join } from 'path';
+import { join } from 'path';
 
 (async function () {
     findRemoveSync(join(__dirname, './cache'), { dir: '*', files: '*.*' });

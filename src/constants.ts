@@ -1,1 +1,1 @@
-export const IMAGE_DURATION = 8;
+export const IMAGE_DURATION = 6;

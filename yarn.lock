@@ -121,12 +121,25 @@
   dependencies:
     "@types/node" "*"
 
+"@types/glob@*":
+  version "7.2.0"
+  resolved "https://registry.npmmirror.com/@types/glob/-/glob-7.2.0.tgz#bc1b5bf3aa92f25bd5dd39f35c57361bdce5b2eb"
+  integrity sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==
+  dependencies:
+    "@types/minimatch" "*"
+    "@types/node" "*"
+
 "@types/got@^8":
   version "8.3.6"
   resolved "https://registry.npmmirror.com/@types/got/download/@types/got-8.3.6.tgz#1d8762605818ae8b1ae320f9d7ca5247b6767da7"
   integrity sha1-HYdiYFgYrosa4yD518pSR7Z2fac=
   dependencies:
     "@types/node" "*"
+
+"@types/minimatch@*":
+  version "3.0.5"
+  resolved "https://registry.npmmirror.com/@types/minimatch/-/minimatch-3.0.5.tgz#1001cc5e6a3704b83c236027e77f2f58ea010f40"
+  integrity sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==
 
 "@types/node@*", "@types/node@^17.0.9":
   version "17.0.9"
@@ -138,6 +151,14 @@
   resolved "https://registry.npmmirror.com/@types/sharp/download/@types/sharp-0.29.5.tgz#9c7032d30d138ad16dde6326beaff2af757b91b3"
   integrity sha512-3TC+S3H5RwnJmLYMHrcdfNjz/CaApKmujjY9b6PU/pE6n0qfooi99YqXGWoW8frU9EWYj/XTI35Pzxa+ThAZ5Q==
   dependencies:
+    "@types/node" "*"
+
+"@types/shelljs@^0.8.11":
+  version "0.8.11"
+  resolved "https://registry.npmmirror.com/@types/shelljs/-/shelljs-0.8.11.tgz#17a5696c825974e96828e96e89585d685646fcb8"
+  integrity sha512-x9yaMvEh5BEaZKeVQC4vp3l+QoFj3BXcd4aYfuKSzIIyihjdVARAadYy3SMNIz0WCCdS2vB9JL/U6GQk5PaxQw==
+  dependencies:
+    "@types/glob" "*"
     "@types/node" "*"
 
 "@types/strip-bom@^3.0.0":
